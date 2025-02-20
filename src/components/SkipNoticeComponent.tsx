@@ -631,7 +631,10 @@ class SkipNoticeComponent extends React.Component<SkipNoticeProps, SkipNoticeSta
 
     reskip(buttonIndex: number, index: number, forceSeek: boolean): void {
         this.contentContainer().reskipSponsorTime(this.segments[index], forceSeek);
+        this.reskippedMode(buttonIndex);
+    }
 
+    reskippedMode(buttonIndex: number): void {
         const skipButtonStates = this.state.skipButtonStates;
         skipButtonStates[buttonIndex] = SkipButtonState.Undo;
 
@@ -841,21 +844,6 @@ class SkipNoticeComponent extends React.Component<SkipNoticeProps, SkipNoticeSta
                 return chrome.i18n.getMessage("skip");
             }
         }
-    }
-
-    KeybindVote(): void {
-        const skipButtonStates = this.state.skipButtonStates;
-        skipButtonStates[0] = SkipButtonState.Undo;
-
-        const skipButtonCallbacks = this.state.skipButtonCallbacks;
-        skipButtonCallbacks[0] = this.unskip.bind(this);
-
-        const newState: SkipNoticeState = {
-            skipButtonStates,
-            skipButtonCallbacks,
-        };
-
-        this.setState(newState);
     }
 }
 

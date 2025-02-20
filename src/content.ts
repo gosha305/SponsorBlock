@@ -2537,12 +2537,11 @@ async function handleKeybindVote(type: number): Promise<void>{
 
         if (!lastSkipNotice) {
             const lastSegment = [...sponsorTimes].reverse()?.find((s) => s.source == SponsorSourceType.Server && s.actionType != 'chapter' && (s.segment[0] <= getCurrentTime() && getCurrentTime() - (s.segment[1] || s.segment[0]) <= Config.config.skipNoticeDuration));
-            console.log(sponsorTimes);
             if (!lastSegment) return;
 
             createSkipNotice([lastSegment], shouldAutoSkip(lastSegment), lastSegment?.segment[0], false);
             lastSkipNotice = await skipNotices[0]?.waitForSkipNoticeRef();
-            lastSkipNotice?.KeybindVote();
+            lastSkipNotice?.reskippedMode(0);
         }
 
         lastSkipNotice?.onMouseEnter();
