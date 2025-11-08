@@ -261,9 +261,12 @@ function messageListener(request: Message, sender: unknown, sendResponse: (respo
             }
 
             break;
-        case "unskip":
-            unskipSponsorTime(sponsorTimes.find((segment) => segment.UUID === request.UUID), null, true);
+        case "unskip":{
+            const segment = sponsorTimes.find((segment) => segment.UUID === request.UUID);
+            unskipSponsorTime(segment, null, true);
+            if (segment.actionType === ActionType.Chapter) sendTelemetryAndCount([segment], 0, true);
             break;
+        }
         case "reskip":
             reskipSponsorTime(sponsorTimes.find((segment) => segment.UUID === request.UUID), true);
             break;
