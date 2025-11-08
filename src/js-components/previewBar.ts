@@ -5,7 +5,7 @@ https://github.com/videosegments/videosegments/commits/f1e111bdfe231947800c6efdd
 
 import Config from "../config";
 import { ChapterVote } from "../render/ChapterVote";
-import { ActionType, Category, CategorySkipOption, SegmentContainer, SponsorHideType, SponsorSourceType, SponsorTime } from "../types";
+import { ActionType, Category, CategorySkipOption, SegmentContainer, SegmentUUID, SponsorHideType, SponsorSourceType, SponsorTime } from "../types";
 import { partition } from "../utils/arrayUtils";
 import { DEFAULT_CATEGORY, shortCategoryName } from "../utils/categoryUtils";
 import { normalizeChapterName } from "../utils/exporter";
@@ -30,11 +30,13 @@ export interface PreviewBarSegment {
     source: SponsorSourceType;
     requiredSegment?: boolean;
     selectedSegment?: boolean;
+    UUID?:SegmentUUID;
 }
 
 interface ChapterGroup extends SegmentContainer {
     originalDuration: number;
     actionType: ActionType;
+    UUID?:SegmentUUID;
 }
 
 class PreviewBar {
@@ -590,13 +592,15 @@ class PreviewBar {
                     result.push({
                         segment: [segment.segment[0], segment.segment[1]],
                         originalDuration: segmentDuration,
-                        actionType: priorityActionType
+                        actionType: priorityActionType,
+                        UUID: segment.UUID,
                     });
                     if (latestValidChapter?.segment[1] > segment.segment[1]) {
                         result.push({
                             segment: [segment.segment[1], latestValidChapter.segment[1]],
                             originalDuration: latestValidChapter.originalDuration,
-                            actionType: latestValidChapter.actionType
+                            actionType: latestValidChapter.actionType,
+                            UUID: segment.UUID,
                         });
                     }
 
@@ -616,7 +620,8 @@ class PreviewBar {
                     result.push({
                         segment: [latestChapter.segment[1], segment.segment[1]],
                         originalDuration: segmentDuration,
-                        actionType: segment.actionType
+                        actionType: segment.actionType,
+                        UUID: segment.UUID
                     });
                 }
             } else {
@@ -635,7 +640,8 @@ class PreviewBar {
                 result.push({
                     segment: [segment.segment[0], endTime],
                     originalDuration: endTime - segment.segment[0],
-                    actionType: segment.actionType
+                    actionType: segment.actionType,
+                    UUID: segment.UUID
                 });
             }
 

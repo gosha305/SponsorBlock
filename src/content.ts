@@ -1436,6 +1436,7 @@ function updatePreviewBar(): void {
                 showLarger: segment.actionType === ActionType.Poi,
                 description: segment.description,
                 source: segment.source,
+                UUID: segment.UUID,
                 requiredSegment: requiredSegment && (segment.UUID === requiredSegment || segment.UUID?.startsWith(requiredSegment) || requiredSegment.startsWith(segment.UUID)),
                 selectedSegment: selectedSegment && segment.UUID === selectedSegment
             });
@@ -1744,9 +1745,7 @@ function sendTelemetryAndCount(skippingSegments: SponsorTime[], secondsSkipped: 
             sponsorSkipped[index] = true;
             if (!counted) {
                 Config.config.minutesSaved = Config.config.minutesSaved + secondsSkipped / 60;
-                if (segment.actionType !== ActionType.Chapter) {
-                    Config.config.skipCount = Config.config.skipCount + 1;
-                }
+                Config.config.skipCount = Config.config.skipCount + 1;
                 counted = true;
             }
             sendSegmentView(segment.UUID, fullSkip);
@@ -2622,6 +2621,9 @@ function nextChapter(): void {
     const nextChapter = chapters.findIndex((time) => time.segment[0] > getCurrentTime());
     if (nextChapter !== -1) {
         setCurrentTime(chapters[nextChapter].segment[0]);
+        if (chapters[nextChapter].UUID){
+            sendTelemetryAndCount([sponsorTimes.find((segment) => (segment.UUID === chapters[nextChapter].UUID))], 0, true);
+        }
     } else {
         setCurrentTime(getVideoDuration());
     }
@@ -2646,6 +2648,9 @@ function previousChapter(): void {
     const previousChapter = nextChapter !== -1 ? (nextChapter - 1) : (chapters.length - 1);
     if (previousChapter !== -1) {
         setCurrentTime(chapters[previousChapter].segment[0]);
+        if (chapters[previousChapter].UUID){
+            sendTelemetryAndCount([sponsorTimes.find((segment) => (segment.UUID === chapters[previousChapter].UUID))], 0, true);
+        }
     } else {
         setCurrentTime(0);
     }
