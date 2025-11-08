@@ -1731,6 +1731,14 @@ function sendTelemetryAndCount(skippingSegments: SponsorTime[], secondsSkipped: 
 
     let counted = false;
     for (const segment of skippingSegments) {
+        if (loopedChapter && segment.segment === loopedChapter.segment){
+            if (!counted){
+                Config.config.skipCount++;
+                counted = true;
+            }
+            sendSegmentView(segment.UUID, true);
+            continue;
+        }
         const index = sponsorTimes?.findIndex((s) => s.segment === segment.segment);
         if (index !== -1 && !sponsorSkipped[index]) {
             sponsorSkipped[index] = true;
@@ -1741,14 +1749,17 @@ function sendTelemetryAndCount(skippingSegments: SponsorTime[], secondsSkipped: 
                 }
                 counted = true;
             }
+            sendSegmentView(segment.UUID, fullSkip);
+        }
+    }
+}
 
-            if (fullSkip) asyncRequestToServer("POST", "/api/viewedVideoSponsorTime?UUID=" + segment.UUID + "&videoID=" + getVideoID())
+function sendSegmentView(UUID: SegmentUUID, fullSkip: boolean){
+    if (fullSkip) asyncRequestToServer("POST", "/api/viewedVideoSponsorTime?UUID=" + UUID + "&videoID=" + getVideoID())
                 .then(r => {
                     if (!r.ok) logRequest(r, "SB", "segment skip log");
                 })
                 .catch(e => console.warn("[SB] Caught error while attempting to log segment skip", e));
-        }
-    }
 }
 
 //skip from the start time to the end time for a certain index sponsor time
@@ -1844,7 +1855,7 @@ function skipToTime({v, skipTime, skippingSegments, openNotice, forceAutoSkip, u
     }
 
     //send telemetry that a this sponsor was skipped
-    if (autoSkip || isSubmittingSegment) sendTelemetryAndCount(skippingSegments, skipTime[1] - skipTime[0], true);
+    if (autoSkip || isSubmittingSegment) sendTelemetryAndCount(skippingSegments, Math.max(skipTime[1] - skipTime[0],0), true);
 }
 
 function createSkipNotice(skippingSegments: SponsorTime[], autoSkip: boolean, unskipTime: number, startReskip: boolean, voteNotice = false) {
